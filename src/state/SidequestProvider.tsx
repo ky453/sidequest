@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import type { Plan, PlanSchedule, SavedExperience } from '../types'
+import type { Memory, MemoryDraft, Plan, PlanSchedule, SavedExperience } from '../types'
 import { SidequestContext } from './sidequest-context'
 import { experiences } from '../data/experiences'
 import { initialPlans, planningToday } from '../data/plans'
 import { scheduleProblem } from '../lib/plans'
+import { addPerson, memoryProblem } from '../lib/memories'
 
 export function SidequestProvider({ children }: { children: ReactNode }) {
   const [savedExperiences, setSavedExperiences] = useState<SavedExperience[]>([])
   const [plans, setPlans] = useState<Plan[]>(() => initialPlans.map((plan) => ({ ...plan })))
   const [planningDate, setPlanningDate] = useState(planningToday)
+  const [memories, setMemories] = useState<Memory[]>([])
 
   function toggleSaved(experienceId: string) {
     setSavedExperiences((current) => current.some((saved) => saved.experienceId === experienceId)
@@ -45,6 +47,32 @@ export function SidequestProvider({ children }: { children: ReactNode }) {
     setPlans((current) => current.filter((plan) => plan.id !== planId || plan.status !== 'planned'))
   }
 
+  function completePlan(planId: string) {
+    const completedAt = new Date().toISOString()
+    setPlans((current) => current.map((plan) => plan.id === planId && plan.status === 'planned'
+      ? { ...plan, status: 'completed', completedAt }
+      : plan))
+  }
+
+  function saveMemory(planId: string, draft: MemoryDraft) {
+    const plan = plans.find((item) => item.id === planId && item.status === 'completed')
+    if (!plan || !experiences.some((item) => item.id === plan.experienceId)) throw new Error('This completed plan could not be found.')
+    if (memories.some((memory) => memory.planId === planId)) throw new Error('A memory has already been saved for this plan.')
+    const problem = memoryProblem(draft)
+    if (problem) throw new Error(problem)
+    const memory: Memory = {
+      ...draft,
+      name: draft.name.trim(),
+      people: draft.people.reduce<string[]>((people, name) => addPerson(people, name), []),
+      journal: draft.journal.trim(),
+      id: crypto.randomUUID(),
+      experienceId: plan.experienceId,
+      planId: plan.id,
+      createdAt: new Date().toISOString(),
+    }
+    setMemories((current) => current.some((item) => item.planId === planId) ? current : [...current, memory])
+  }
+
   function dismissMemoryPrompt(planId: string) {
     setPlans((current) => current.map((plan) => plan.id === planId && plan.status === 'completed'
       ? { ...plan, memoryPromptDismissedAt: new Date().toISOString() }
@@ -61,7 +89,7 @@ export function SidequestProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SidequestContext value={{ savedExperiences, plans, planningDate, setPlanningDate, toggleSaved, savePlan, removePlan, dismissMemoryPrompt, importPlans }}>
+    <SidequestContext value={{ savedExperiences, plans, memories, planningDate, setPlanningDate, toggleSaved, savePlan, removePlan, completePlan, saveMemory, dismissMemoryPrompt, importPlans }}>
       {children}
     </SidequestContext>
   )

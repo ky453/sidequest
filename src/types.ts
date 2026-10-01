@@ -43,3 +43,27 @@ export interface SavedExperience {
   experienceId: string
   savedAt: string
 }
+
+export interface MemoryPhoto {
+  name: string
+  dataUrl: string
+}
+
+export interface MemoryDraft {
+  name: string
+  date: string
+  startTime: string | null
+  endTime: string | null
+  rating: number | null
+  people: string[]
+  journal: string
+  amountSpent: number | null
+  photo?: MemoryPhoto
+}
+
+export interface Memory extends MemoryDraft {
+  id: string
+  experienceId: string
+  planId: string
+  createdAt: string
+}

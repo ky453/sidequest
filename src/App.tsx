@@ -5,6 +5,7 @@ import { DiscoverView } from './views/DiscoverView'
 import { ActivityRoute } from './views/ActivityRoute'
 import { PlansView } from './views/PlansView'
 import { AddMemoryRoute } from './views/AddMemoryRoute'
+import { MemoriesView } from './views/MemoriesView'
 import './App.css'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="discover" element={<DiscoverView />} />
           <Route path="activities/:experienceId" element={<ActivityRoute />} />
           <Route path="plans" element={<PlansView />} />
+          <Route path="memories" element={<MemoriesView />} />
           <Route path="memories/new" element={<AddMemoryRoute />} />
           <Route path="*" element={<ActivityRoute />} />
         </Route>

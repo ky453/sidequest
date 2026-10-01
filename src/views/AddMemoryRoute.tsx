@@ -1,16 +1,130 @@
-import { ArrowLeft } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { ArrowLeft, CalendarDays, Check, Clock, Image as ImageIcon, Plus, Trash2, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Button } from '../components/Button'
+import { StarRating } from '../components/StarRating'
 import { experiences } from '../data/experiences'
+import { addPerson, photoAccept, photoProblem, readMemoryPhoto, spendingValue } from '../lib/memories'
+import { useSidequest } from '../state/sidequest-context'
+import type { Experience, MemoryPhoto, Plan } from '../types'
 
 export function AddMemoryRoute() {
   const [params] = useSearchParams()
-  const experience = experiences.find((item) => item.id === params.get('experienceId'))
-  return (
-    <div className="route-placeholder">
-      <Link className="back-link" to="/plans"><ArrowLeft size={20} aria-hidden="true" />Back to Plans</Link>
+  const { plans, memories } = useSidequest()
+  const plan = plans.find((item) => item.id === params.get('planId') && item.experienceId === params.get('experienceId') && item.status === 'completed')
+  const experience = experiences.find((item) => item.id === plan?.experienceId)
+  const existing = memories.some((memory) => memory.planId === plan?.id)
+  useEffect(() => { window.scrollTo(0, 0) }, [plan?.id])
+  if (!plan || !experience || existing) return <div className="route-placeholder">
+    <Link className="back-link" to="/plans"><ArrowLeft size={20} aria-hidden="true" />Back to Plans</Link>
+    <h1>Add Memory</h1>
+    <p>{existing ? 'A memory has already been saved for this plan.' : 'Completed plan not found.'}</p>
+    {existing && <Link className="button button--primary" to="/memories">View Memories</Link>}
+  </div>
+  return <MemoryForm key={plan.id} plan={plan} experience={experience} />
+}
+
+function MemoryForm({ plan, experience }: { plan: Plan; experience: Experience }) {
+  const { saveMemory } = useSidequest()
+  const navigate = useNavigate()
+  const [name, setName] = useState(experience.title)
+  const [date, setDate] = useState(plan.plannedDate)
+  const [startTime, setStartTime] = useState(plan.startTime)
+  const [endTime, setEndTime] = useState(plan.endTime)
+  const [rating, setRating] = useState<number | null>(null)
+  const [people, setPeople] = useState<string[]>([])
+  const [addingPerson, setAddingPerson] = useState(false)
+  const [personName, setPersonName] = useState('')
+  const [journal, setJournal] = useState('')
+  const [spending, setSpending] = useState('')
+  const [photo, setPhoto] = useState<MemoryPhoto>()
+  const [photoLoading, setPhotoLoading] = useState(false)
+  const [photoError, setPhotoError] = useState('')
+  const [error, setError] = useState('')
+  const fileInput = useRef<HTMLInputElement>(null)
+  const photoRequest = useRef(0)
+  useEffect(() => () => { photoRequest.current += 1 }, [])
+
+  function commitPerson() {
+    if (!personName.trim()) return
+    setPeople((current) => addPerson(current, personName))
+    setPersonName('')
+    setAddingPerson(false)
+  }
+
+  async function selectPhoto(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    const request = ++photoRequest.current
+    const problem = photoProblem(file)
+    setPhotoError(problem ?? '')
+    setPhotoLoading(!problem)
+    if (problem) return
+    try {
+      const selected = await readMemoryPhoto(file)
+      if (photoRequest.current === request) setPhoto(selected)
+    } catch (error) {
+      if (photoRequest.current === request) setPhotoError(error instanceof Error ? error.message : 'Unable to open this photo.')
+    } finally {
+      if (photoRequest.current === request) setPhotoLoading(false)
+    }
+  }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (photoLoading) return
+    try {
+      saveMemory(plan.id, { name, date, startTime: startTime || null, endTime: endTime || null, rating, people: addPerson(people, personName), journal, amountSpent: spendingValue(spending), photo })
+      navigate('/memories', { replace: true })
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Unable to save this memory.')
+    }
+  }
+
+  return <div className="add-memory-view">
+    <header className="memory-header">
+      <Link className="activity-back" to="/plans" aria-label="Back to Plans" title="Back to Plans"><ArrowLeft size={17} aria-hidden="true" /></Link>
       <h1>Add Memory</h1>
-      <p>{experience?.title ?? 'Activity not found'}</p>
-      {experience && <p>The memory form is coming soon.</p>}
-    </div>
-  )
+    </header>
+    <form className="memory-form" onSubmit={submit}>
+      <label className="memory-field">Place or Activity<input required type="text" value={name} onChange={(event) => { setName(event.target.value); setError('') }} /></label>
+      <div className="memory-date-spending">
+        <label className="memory-field">Date<span className="memory-input-icon"><CalendarDays size={15} aria-hidden="true" /><input required type="date" value={date} onChange={(event) => { setDate(event.target.value); setError('') }} /></span></label>
+        <label className="memory-field">Spending<span className="memory-input-icon"><span aria-hidden="true">$</span><input type="number" inputMode="decimal" min="0" step="0.01" aria-label="Spending" placeholder="0.00" value={spending} onChange={(event) => { setSpending(event.target.value); setError('') }} /></span></label>
+      </div>
+      <div className="memory-time-range">
+        <label className="memory-field">Start Time<span className="memory-input-icon"><Clock size={15} aria-hidden="true" /><input type="time" value={startTime} onChange={(event) => { setStartTime(event.target.value); setError('') }} /></span></label>
+        <label className="memory-field">End Time<span className="memory-input-icon"><Clock size={15} aria-hidden="true" /><input type="time" value={endTime} onChange={(event) => { setEndTime(event.target.value); setError('') }} /></span></label>
+      </div>
+      <fieldset className="memory-field memory-fieldset"><legend>Rating</legend><StarRating value={rating} onChange={setRating} /></fieldset>
+      <fieldset className="memory-field memory-fieldset"><legend>People With You</legend>
+        <div className="memory-people">
+          {people.map((person) => <span className="person-chip" key={person}><span>{person}</span><button type="button" aria-label={`Remove ${person}`} title={`Remove ${person}`} onClick={() => setPeople((current) => current.filter((name) => name !== person))}><X size={12} aria-hidden="true" /></button></span>)}
+          {!addingPerson && <Button className="add-friend-button" onClick={() => setAddingPerson(true)}><Plus size={11} aria-hidden="true" />Add Friend</Button>}
+        </div>
+        {addingPerson && <div className="person-editor">
+          <input type="text" aria-label="Friend name" placeholder="Name" autoFocus value={personName} onChange={(event) => setPersonName(event.target.value)} onKeyDown={(event) => {
+            if (event.key === 'Enter') { event.preventDefault(); commitPerson() }
+            if (event.key === 'Escape') { event.preventDefault(); setAddingPerson(false); setPersonName('') }
+          }} />
+          <button type="button" className="person-editor-action" title="Add friend" aria-label="Add friend" disabled={!personName.trim()} onClick={commitPerson}><Check size={18} aria-hidden="true" /></button>
+          <button type="button" className="person-editor-action" title="Cancel adding friend" aria-label="Cancel adding friend" onClick={() => { setAddingPerson(false); setPersonName('') }}><X size={18} aria-hidden="true" /></button>
+        </div>}
+      </fieldset>
+      <label className="memory-field">Journal Note<textarea rows={4} value={journal} onChange={(event) => setJournal(event.target.value)} /></label>
+      <div className="memory-field">
+        <span>Attach Photo</span>
+        <input ref={fileInput} className="sr-only" tabIndex={-1} type="file" accept={photoAccept} aria-label="Attach photo" onChange={selectPhoto} />
+        <button className={`memory-photo-placeholder${photo ? ' memory-photo-placeholder--filled' : ''}`} type="button" aria-label={photo ? 'Replace photo' : 'Select photo'} onClick={() => fileInput.current?.click()}>
+          {photo ? <img src={photo.dataUrl} alt={photo.name} /> : <><ImageIcon size={28} aria-hidden="true" /><span>{photoLoading ? 'Opening photo...' : 'Tap to upload media'}</span></>}
+        </button>
+        {photo && <div className="memory-photo-caption"><span>{photo.name}</span><button type="button" title="Remove photo" aria-label="Remove photo" onClick={() => { photoRequest.current += 1; setPhoto(undefined); setPhotoLoading(false); setPhotoError('') }}><Trash2 size={16} aria-hidden="true" /></button></div>}
+        {photoError && <p className="memory-error" role="alert">{photoError}</p>}
+      </div>
+      {error && <p className="memory-error" role="alert">{error}</p>}
+      <div className="memory-form-actions"><Button onClick={() => navigate('/plans')}>Cancel</Button><Button variant="primary" type="submit" disabled={photoLoading}><Check size={16} aria-hidden="true" />Save Memory</Button></div>
+    </form>
+  </div>
 }

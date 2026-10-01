@@ -13,13 +13,13 @@ import { useSidequest } from '../state/sidequest-context'
 import type { Plan } from '../types'
 
 export function PlansView() {
-  const { plans, planningDate, setPlanningDate, importPlans } = useSidequest()
+  const { plans, memories, planningDate, setPlanningDate, importPlans } = useSidequest()
   const fileInput = useRef<HTMLInputElement>(null)
   const [importStatus, setImportStatus] = useState('')
   const [modal, setModal] = useState<{ defaultDate: string; plan?: Plan } | null>(null)
   const upcoming = plans.filter((plan) => plan.status === 'planned' && plan.plannedDate === planningDate)
     .sort((left, right) => left.startTime.localeCompare(right.startTime))
-  const completed = plans.filter((plan) => plan.status === 'completed' && !plan.memoryPromptDismissedAt)
+  const completed = plans.filter((plan) => plan.status === 'completed' && !plan.memoryPromptDismissedAt && !memories.some((memory) => memory.planId === plan.id))
     .sort((left, right) => (right.completedAt ?? right.plannedDate).localeCompare(left.completedAt ?? left.plannedDate))
 
   async function handleImport(event: ChangeEvent<HTMLInputElement>) {

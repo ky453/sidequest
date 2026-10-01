@@ -9,10 +9,10 @@ export function BottomNav() {
       <NavLink to="/discover" className={({ isActive }) => `nav-item${isActive || isActivity ? ' nav-item--active' : ''}`}>
         <Search size={21} aria-hidden="true" /><span>Discover</span>
       </NavLink>
-      <NavLink to="/plans" className={({ isActive }) => `nav-item${isActive || isAddMemory ? ' nav-item--active' : ''}`}>
+      <NavLink to="/plans" className={({ isActive }) => `nav-item${isActive ? ' nav-item--active' : ''}`}>
         <CalendarDays size={21} aria-hidden="true" /><span>Plans</span>
       </NavLink>
-      <button className="nav-item" disabled title="Memories is coming later"><Heart size={21} aria-hidden="true" /><span>Memories</span></button>
+      <NavLink to="/memories" className={({ isActive }) => `nav-item${isActive || isAddMemory ? ' nav-item--active' : ''}`}><Heart size={21} aria-hidden="true" /><span>Memories</span></NavLink>
       <button className="nav-item" disabled title="Profile is coming later"><UserRound size={21} aria-hidden="true" /><span>Profile</span></button>
     </nav>
   )

@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, Check, ChevronRight, LockKeyhole, Trash2 } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Check, ChevronRight, CircleCheck, LockKeyhole, Trash2 } from 'lucide-react'
 import { useId, useState } from 'react'
 import type { FormEvent } from 'react'
 import { categories, experiences } from '../data/experiences'
@@ -72,7 +72,7 @@ function ScheduleForm({ experience, plan, defaultDate, onClose, onBack }: {
   onClose: () => void
   onBack?: () => void
 }) {
-  const { savePlan, removePlan } = useSidequest()
+  const { savePlan, removePlan, completePlan } = useSidequest()
   const fixed = experience.schedule.type === 'fixed'
   const initial = fixed ? experience.schedule : plan
   const [plannedDate, setPlannedDate] = useState(initial && 'plannedDate' in initial ? initial.plannedDate : defaultDate ?? '')
@@ -111,7 +111,10 @@ function ScheduleForm({ experience, plan, defaultDate, onClose, onBack }: {
         <Button onClick={onClose}>Cancel</Button>
         {(!fixed || !plan) && <Button type="submit" variant="primary"><Check size={16} aria-hidden="true" />{plan ? 'Save Changes' : 'Add to Plan'}</Button>}
       </div>
-      {plan && <Button className="remove-plan-button" onClick={() => { removePlan(plan.id); onClose() }}><Trash2 size={16} aria-hidden="true" />Remove Event</Button>}
+      {plan && <div className="plan-status-actions">
+        <Button onClick={() => { completePlan(plan.id); onClose() }}><CircleCheck size={16} aria-hidden="true" />Mark Completed</Button>
+        <Button className="remove-plan-button" onClick={() => { removePlan(plan.id); onClose() }}><Trash2 size={16} aria-hidden="true" />Remove Event</Button>
+      </div>}
     </form>
   )
 }

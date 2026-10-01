@@ -18,6 +18,7 @@ export interface Experience {
   recommended: boolean
   startsAt?: string
   imageUrl?: string
+  imageDescription?: string
 }
 
 export interface Plan {

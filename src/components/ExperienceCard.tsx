@@ -2,15 +2,11 @@ import { MapPin } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { categories } from '../data/experiences'
 import { formatCost, formatDuration } from '../lib/discovery'
-import { useSidequest } from '../state/sidequest-context'
 import type { Experience } from '../types'
-import { Button } from './Button'
+import { ExperienceActions } from './ExperienceActions'
 
 export function ExperienceCard({ experience }: { experience: Experience }) {
-  const { savedExperiences, plans, toggleSaved, togglePlanned } = useSidequest()
   const location = useLocation()
-  const saved = savedExperiences.some((item) => item.experienceId === experience.id)
-  const planned = plans.some((item) => item.experienceId === experience.id)
   const category = categories.find((item) => item.id === experience.category)?.label
 
   return (
@@ -28,10 +24,7 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
         <span>{experience.groupSize.min}-{experience.groupSize.max} people</span>
       </div>
       <p className="experience-distance"><MapPin size={14} aria-hidden="true" />{experience.distanceMiles.toFixed(1)} mi away</p>
-      <div className="experience-actions">
-        <Button variant="primary" aria-pressed={planned} aria-label={`${planned ? 'Remove from plan' : 'Add to plan'}: ${experience.title}`} onClick={() => togglePlanned(experience.id)}>{planned ? 'Added to Plan' : 'Add to Plan'}</Button>
-        <Button aria-pressed={saved} aria-label={`${saved ? 'Unsave' : 'Save'}: ${experience.title}`} onClick={() => toggleSaved(experience.id)}>{saved ? 'Saved' : 'Save'}</Button>
-      </div>
+      <ExperienceActions experience={experience} />
     </article>
   )
 }

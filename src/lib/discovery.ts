@@ -29,14 +29,17 @@ export function filterExperiences(items: Experience[], filters: DiscoveryFilters
   })
 }
 
-export function formatCost(cost: Experience['cost']) {
-  return cost.max === 0 ? 'Free' : cost.min === cost.max ? `$${cost.max}` : `$${cost.min}-$${cost.max}`
+export function formatCost(cost: Experience['cost'], spacedRange = false) {
+  return cost.max === 0 ? 'Free' : cost.min === cost.max ? `$${cost.max}` : `$${cost.min}${spacedRange ? ' - ' : '-'}$${cost.max}`
 }
 
-export function formatDuration(duration: Experience['duration']) {
+export function formatDuration(duration: Experience['duration'], unitStyle: 'short' | 'long' = 'short') {
   const { minMinutes, maxMinutes } = duration
   if (minMinutes >= 60 && minMinutes % 60 === 0 && maxMinutes % 60 === 0) {
-    return minMinutes === maxMinutes ? `${minMinutes / 60} hr` : `${minMinutes / 60}-${maxMinutes / 60} hrs`
+    return minMinutes === maxMinutes
+      ? `${minMinutes / 60} ${unitStyle === 'long' ? 'Hour' : 'hr'}`
+      : `${minMinutes / 60}-${maxMinutes / 60} ${unitStyle === 'long' ? 'Hours' : 'hrs'}`
   }
-  return minMinutes === maxMinutes ? `${minMinutes} min` : `${minMinutes}-${maxMinutes} min`
+  const unit = unitStyle === 'long' ? 'Minutes' : 'min'
+  return minMinutes === maxMinutes ? `${minMinutes} ${unit}` : `${minMinutes}-${maxMinutes} ${unit}`
 }

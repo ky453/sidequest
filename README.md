@@ -1,32 +1,31 @@
-# React + TypeScript + Vite
+# Sidequest
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React, TypeScript, and Vite app with React Router and Lucide icons.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+`npm run lint` checks source code. `npm run build` checks TypeScript and creates the production bundle.
+
+## Current Scope
+
+Discover follows `design/sidequest-discover.png`. Product behavior follows `docs/Sidequest_PRD.md`. Only Discover is implemented; `/activities/:experienceId` is a minimal route placeholder. Plans, Memories, Profile, and notifications are disabled until their screens are implemented.
+
+Search, budget, distance, mood, and category filters work against mock Ithaca experiences. The first three recommendations match the design; See all, search, and filtering also expose additional mock activities. Budget matching uses the upper estimated cost so the entire range fits the selected limit. The image areas intentionally match the empty placeholders in the PNG. Device status and home indicators are omitted from the web UI.
+
+Search and filter values use URL parameters. Save and Add to Plan are independent, reversible actions held in a shared React context. Plans are unscheduled until scheduling is implemented. State survives route navigation but resets on refresh. There is no backend or browser storage.
+
+## Structure
+
+- `src/components/`: shared app shell, navigation, header, search, filters, buttons, and experience cards.
+- `src/data/`: typed mock experiences and category metadata.
+- `src/lib/`: search/filter logic and display formatting.
+- `src/state/`: shared saved-experience and plan state.
+- `src/views/`: Discover and the activity route placeholder.
+- `src/types.ts`: experience, saved-experience, and plan models.
+
+Future deployment must serve `index.html` for app routes to support direct links with BrowserRouter. Features without current designs, including available-time filters and submissions, are deferred.

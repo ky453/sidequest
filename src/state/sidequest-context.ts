@@ -1,11 +1,16 @@
 import { createContext, useContext } from 'react'
-import type { Plan, SavedExperience } from '../types'
+import type { Plan, PlanSchedule, SavedExperience } from '../types'
 
 export interface SidequestState {
   savedExperiences: SavedExperience[]
   plans: Plan[]
+  planningDate: string
+  setPlanningDate: (date: string) => void
+  dismissMemoryPrompt: (planId: string) => void
+  importPlans: (plans: Plan[]) => void
   toggleSaved: (experienceId: string) => void
-  togglePlanned: (experienceId: string) => void
+  savePlan: (experienceId: string, schedule: PlanSchedule, planId?: string) => void
+  removePlan: (planId: string) => void
 }
 
 export const SidequestContext = createContext<SidequestState | null>(null)

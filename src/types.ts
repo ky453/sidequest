@@ -1,6 +1,14 @@
 export type Category = 'outdoors' | 'food' | 'study' | 'socials'
 export type Mood = 'relaxed' | 'adventurous' | 'social' | 'focused'
 
+export interface PlanSchedule {
+  plannedDate: string
+  startTime: string
+  endTime: string
+}
+
+export type ExperienceSchedule = { type: 'flexible' } | ({ type: 'fixed' } & PlanSchedule)
+
 export interface Experience {
   id: string
   title: string
@@ -16,16 +24,19 @@ export interface Experience {
   reviewCount: number
   searchTags: string[]
   recommended: boolean
-  startsAt?: string
+  schedule: ExperienceSchedule
   imageUrl?: string
   imageDescription?: string
 }
 
-export interface Plan {
+export interface Plan extends PlanSchedule {
+  id: string
   experienceId: string
   addedAt: string
-  plannedFor?: string
   status: 'planned' | 'completed'
+  completedAt?: string
+  memoryPromptDismissedAt?: string
+  note?: string
 }
 
 export interface SavedExperience {

@@ -6,6 +6,7 @@ import { ExperienceActions } from '../components/ExperienceActions'
 import { ExperienceHero } from '../components/ExperienceHero'
 import { categories, experiences } from '../data/experiences'
 import { formatCost, formatDuration } from '../lib/discovery'
+import { formatPlanDate, formatPlanTime } from '../lib/plans'
 import type { Experience } from '../types'
 
 export function ActivityRoute() {
@@ -33,11 +34,7 @@ function ActivityDetails({ experience, from }: { experience: Experience; from: s
     window.scrollTo(0, 0)
   }, [experience.id])
   const category = categories.find((item) => item.id === experience.category)?.label
-  const eventDate = experience.startsAt ? new Date(experience.startsAt) : null
-  const eventDateLabel = eventDate && new Intl.DateTimeFormat('en-US', {
-    weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
-    timeZone: 'America/New_York', timeZoneName: 'short',
-  }).format(eventDate)
+  const fixedSchedule = experience.schedule.type === 'fixed' ? experience.schedule : null
 
   async function copyActivityLink() {
     try {
@@ -80,7 +77,7 @@ function ActivityDetails({ experience, from }: { experience: Experience; from: s
       <section className="activity-about" aria-labelledby="activity-about-title">
         <h2 id="activity-about-title">About this Sidequest</h2>
         <p>{experience.description}</p>
-        {eventDateLabel && <p className="activity-event-date"><time dateTime={experience.startsAt}>{eventDateLabel}</time></p>}
+        {fixedSchedule && <p className="activity-event-date"><time dateTime={fixedSchedule.plannedDate}>{formatPlanDate(fixedSchedule.plannedDate, { weekday: 'long', month: 'short', day: 'numeric' })}</time>, {formatPlanTime(fixedSchedule.startTime)} - {formatPlanTime(fixedSchedule.endTime)} Eastern Time</p>}
       </section>
 
       <ExperienceActions experience={experience} layout="detail">

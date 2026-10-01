@@ -10,6 +10,7 @@ export const categories: { id: Category; label: string }[] = [
 export const experiences: Experience[] = [
   {
     id: 'buttermilk-falls-trail',
+    schedule: { type: 'flexible' },
     title: 'Buttermilk Falls Trail',
     category: 'outdoors',
     moodTags: ['relaxed', 'adventurous'],
@@ -27,6 +28,7 @@ export const experiences: Experience[] = [
   },
   {
     id: 'downtown-farmers-market',
+    schedule: { type: 'fixed', plannedDate: '2026-10-09', startTime: '16:00', endTime: '18:00' },
     title: 'Downtown Farmers Market',
     category: 'food',
     moodTags: ['relaxed', 'social'],
@@ -41,10 +43,10 @@ export const experiences: Experience[] = [
     reviewCount: 86,
     searchTags: ['food', 'local', 'shopping', 'market', 'snacks'],
     recommended: true,
-    startsAt: '2026-10-09T16:00:00-04:00',
   },
   {
     id: 'regal-movies-night',
+    schedule: { type: 'flexible' },
     title: 'Regal Movies Night',
     category: 'socials',
     moodTags: ['relaxed', 'social'],
@@ -62,6 +64,7 @@ export const experiences: Experience[] = [
   },
   {
     id: 'campus-boba-break',
+    schedule: { type: 'flexible' },
     title: 'Campus Boba Break',
     category: 'food',
     moodTags: ['relaxed', 'social'],
@@ -79,6 +82,7 @@ export const experiences: Experience[] = [
   },
   {
     id: 'olin-library-study',
+    schedule: { type: 'flexible' },
     title: 'Olin Library Study Session',
     category: 'study',
     moodTags: ['focused', 'relaxed'],
@@ -96,6 +100,7 @@ export const experiences: Experience[] = [
   },
   {
     id: 'sunset-point-walk',
+    schedule: { type: 'flexible' },
     title: 'Sunset Point Walk',
     category: 'outdoors',
     moodTags: ['adventurous', 'relaxed'],

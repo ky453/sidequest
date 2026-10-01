@@ -1,17 +1,21 @@
 import { Bookmark } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { useSidequest } from '../state/sidequest-context'
 import type { Experience } from '../types'
 import { Button } from './Button'
+import { PlanModal } from './PlanModal'
 
 export function ExperienceActions({ experience, layout = 'card', children }: {
   experience: Experience
   layout?: 'card' | 'detail'
   children?: ReactNode
 }) {
-  const { savedExperiences, plans, toggleSaved, togglePlanned } = useSidequest()
+  const { savedExperiences, plans, toggleSaved } = useSidequest()
+  const [scheduling, setScheduling] = useState(false)
   const saved = savedExperiences.some((item) => item.experienceId === experience.id)
-  const planned = plans.some((item) => item.experienceId === experience.id)
+  const plan = plans.find((item) => item.experienceId === experience.id && item.status === 'planned')
+  const planned = !!plan
   const detail = layout === 'detail'
 
   const saveButton = (
@@ -30,12 +34,15 @@ export function ExperienceActions({ experience, layout = 'card', children }: {
       <Button
         variant="primary"
         aria-pressed={planned}
-        aria-label={`${planned ? 'Remove from plan' : 'Add to plan'}: ${experience.title}`}
-        onClick={() => togglePlanned(experience.id)}
+        aria-label={`${planned ? 'Edit plan' : 'Add to plan'}: ${experience.title}`}
+        aria-haspopup="dialog"
+        title={planned ? 'Edit plan' : 'Add to plan'}
+        onClick={() => setScheduling(true)}
       >
         {planned ? 'Added to Plan' : 'Add to Plan'}
       </Button>
       {detail ? <div className="activity-secondary-actions">{saveButton}{children}</div> : saveButton}
+      {scheduling && <PlanModal experience={experience} plan={plan} onClose={() => setScheduling(false)} />}
     </div>
   )
 }

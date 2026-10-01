@@ -86,6 +86,86 @@ h2 { font-size: 14px; line-height: 17px; font-weight: 700; text-transform: upper
 .activity-actions .activity-share { padding: 0; color: #07998d; }
 .activity-share-error { margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 18px; }
 
+.calendar-heading { display: flex; align-items: center; justify-content: space-between; min-height: 22px; gap: 8px; }
+.calendar-heading h2 { font-size: 16px; line-height: 20px; text-transform: none; }
+.calendar-navigation { display: flex; gap: 4px; }
+.calendar-navigation button { display: grid; place-items: center; width: 20px; height: 22px; padding: 0; border: 0; background: transparent; }
+.calendar-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: 16px; grid-auto-rows: 34px; justify-items: center; align-items: center; row-gap: 6px; margin-top: 8px; padding: 10px 2px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.calendar-weekday { color: var(--muted); font-size: 11px; line-height: 16px; font-weight: 600; }
+.calendar-day { position: relative; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; padding: 0; background: transparent; font-size: 12px; }
+.calendar-day--outside { color: var(--muted); }
+.calendar-day--scheduled::after { content: ''; position: absolute; bottom: 2px; left: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.calendar-day--today { background: var(--peach); box-shadow: 0 0 0 1px #cf987d; font-weight: 700; }
+.calendar-day--selected { color: white; background: var(--accent); font-size: 14px; font-weight: 700; }
+.calendar-day--selected::after { background: white; }
+.calendar-tools-section, .plans-section { margin-top: 18px; }
+.calendar-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.calendar-tools .button { min-height: 36px; gap: 8px; border-radius: 8px; }
+.plan-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.plan-card { border: 1px solid var(--border); border-radius: 12px; padding: 11px; background: var(--surface); }
+.upcoming-plan-link { display: flex; align-items: center; gap: 12px; }
+.plan-date-badge { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 48px; height: 52px; padding: 0; border: 0; border-radius: 8px; background: var(--peach); }
+.plan-date-badge span { color: #ff7048; font-size: 11px; line-height: 14px; text-transform: uppercase; }
+.plan-date-badge strong { font-size: 20px; line-height: 23px; }
+.upcoming-plan-summary { min-width: 0; }
+.plan-card h3 { font-size: 14px; line-height: 17px; overflow-wrap: anywhere; }
+.upcoming-plan-summary p { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 15px; }
+.completed-plan { padding: 13px; }
+.completed-plan-heading { display: flex; align-items: center; gap: 8px; }
+.completed-plan-heading > svg { flex-shrink: 0; color: #ffbc13; }
+.completed-plan-heading h3 { flex: 1; min-width: 0; }
+.completed-plan-heading > span { color: var(--muted); font-size: 11px; line-height: 15px; }
+.completed-plan > p { margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 14px; }
+.completed-plan-actions { display: grid; grid-template-columns: minmax(0, 1fr) 68px; gap: 8px; margin-top: 12px; }
+.completed-plan-actions .button { min-height: 32px; padding: 5px 8px; gap: 4px; border-radius: 6px; font-size: 13px; line-height: 20px; }
+.completed-plan-actions .button--secondary { color: var(--muted); font-size: 12px; font-weight: 400; }
+.plans-empty, .plan-import-status { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 18px; }
+
+.calendar-day { touch-action: pan-y; user-select: none; -webkit-touch-callout: none; }
+.plan-event-button { width: 100%; padding: 0; border: 0; background: transparent; text-align: left; }
+.plan-event-title { display: block; font-size: 14px; line-height: 17px; overflow-wrap: anywhere; }
+.plan-event-time { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 15px; }
+.plans-day-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.selected-date-control { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--muted); }
+.selected-date-control input { width: 145px; min-width: 0; height: 34px; padding: 4px 2px; border: 0; background: transparent; color: var(--ink); font-size: 13px; }
+.add-event-button { flex-shrink: 0; min-height: 34px; gap: 4px; padding: 6px 9px; border-radius: 8px; font-size: 13px; }
+
+.modal { width: min(440px, calc(100% - 32px)); max-height: min(680px, calc(100svh - 32px)); padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); overflow-y: auto; overscroll-behavior: contain; }
+.modal::backdrop { background: rgb(19 54 62 / 40%); }
+.modal-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.modal-header h2 { font-size: 18px; line-height: 24px; text-transform: none; }
+.modal-close { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--muted); }
+.experience-picker, .schedule-form { padding: 20px; }
+.experience-picker-list { margin-top: 16px; }
+.experience-picker-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid var(--border); background: transparent; text-align: left; }
+.experience-picker-row:hover { background: #f3fbfa; }
+.experience-picker-row > svg { flex-shrink: 0; }
+.experience-picker-row > span { flex: 1; min-width: 0; }
+.experience-picker-row strong { display: block; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.experience-picker-row > span > span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 18px; }
+.experience-picker-row > span > .picker-fixed-date { display: flex; align-items: center; gap: 4px; color: #21746a; }
+.picker-empty { padding: 24px 0; color: var(--muted); text-align: center; font-size: 14px; }
+.schedule-back { display: inline-flex; align-items: center; gap: 6px; padding: 0; margin-bottom: 16px; border: 0; background: transparent; color: #11796f; font-size: 13px; }
+.schedule-form h3 { font-size: 16px; line-height: 22px; overflow-wrap: anywhere; }
+.schedule-location { margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 18px; }
+.fixed-schedule-notice { display: flex; align-items: center; gap: 6px; margin-top: 16px; color: #21746a; font-size: 13px; line-height: 20px; }
+.schedule-fields { margin: 16px 0 0; padding: 0; border: 0; min-width: 0; }
+.schedule-fields label { display: block; min-width: 0; font-size: 13px; line-height: 20px; font-weight: 600; }
+.schedule-fields input { display: block; width: 100%; min-width: 0; max-width: 100%; height: 42px; padding: 8px 10px; margin-top: 6px; border: 1px solid var(--border); border-radius: 6px; background: white; color: var(--ink); font-size: 16px; }
+.schedule-fields input:disabled { background: #f4f6f6; color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.schedule-time-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.schedule-timezone { margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 18px; }
+.schedule-error { margin-top: 12px; color: #9c3542; font-size: 13px; line-height: 18px; }
+.schedule-footer { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 20px; }
+.schedule-footer:has(> :only-child) { grid-template-columns: 1fr; }
+.schedule-footer .button { gap: 6px; border-radius: 6px; }
+.remove-plan-button { width: 100%; margin-top: 12px; gap: 6px; color: #9c3542; border-color: #e8cdd1; border-radius: 6px; }
+
+@media (max-width: 360px) {
+  .schedule-time-row { grid-template-columns: 1fr; }
+  .schedule-footer { grid-template-columns: 1fr; }
+}
+
 @media (min-width: 640px) {
   main { padding-top: 40px; }
   .experience-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }

@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Image as ImageIcon, Pencil, UserRound } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { MemoryDetail } from '../components/MemoryDetail'
@@ -25,7 +25,6 @@ export function ProfileView() {
   const selectedMemory = summary.favorites.find((memory) => memory.id === selectedMemoryId)
   const monthLabel = formatPlanDate(`${month}-01`, { month: 'long', year: 'numeric' })
   const period = month === currentMonth ? 'this month' : `in ${monthLabel}`
-  useEffect(() => { window.scrollTo(0, 0) }, [])
   function changeMonth(offset: number) {
     const next = moveCalendarMonth(`${month}-01`, offset).slice(0, 7)
     if (next > currentMonth || !/^\d{4}-\d{2}$/.test(next)) return
@@ -74,9 +73,9 @@ export function ProfileView() {
     <section className="profile-summary" aria-labelledby="profile-summary-heading">
       <h2 id="profile-summary-heading">Monthly Summary</h2>
       <dl className="profile-stats">
-        <div><dd data-testid="profile-activities">{summary.activitiesDone}</dd><dt>Activities done</dt></div>
-        <div><dd data-testid="profile-places">{summary.newPlaces}</dd><dt>New places visited</dt></div>
-        <div><dd data-testid="profile-rating">{summary.averageRating === null ? '0' : summary.averageRating.toFixed(1)}</dd><dt>Avg experience rating</dt></div>
+        <div><dt>Activities done</dt><dd data-testid="profile-activities">{summary.activitiesDone}</dd></div>
+        <div><dt>New places visited</dt><dd data-testid="profile-places">{summary.newPlaces}</dd></div>
+        <div><dt>Avg experience rating</dt><dd data-testid="profile-rating">{summary.averageRating === null ? '0' : summary.averageRating.toFixed(1)}</dd></div>
       </dl>
     </section>
     <section className="profile-favorites" aria-labelledby="profile-favorites-heading">

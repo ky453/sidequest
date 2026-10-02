@@ -39,7 +39,7 @@ export function ExperienceActions({ experience, layout = 'card', children }: {
         title={planned ? 'Edit plan' : 'Add to plan'}
         onClick={() => setScheduling(true)}
       >
-        {planned ? 'Added to Plan' : 'Add to Plan'}
+        {planned ? 'Edit Plan' : 'Add to Plan'}
       </Button>
       {detail ? <div className="activity-secondary-actions">{saveButton}{children}</div> : saveButton}
       {scheduling && <PlanModal experience={experience} plan={plan} onClose={() => setScheduling(false)} />}

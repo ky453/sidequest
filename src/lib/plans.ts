@@ -1,5 +1,5 @@
 import { experiences } from '../data/experiences'
-import type { Plan, PlanSchedule } from '../types'
+import type { Memory, Plan, PlanSchedule } from '../types'
 
 const dateKeyFormatter = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -71,6 +71,26 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function validTimestamp(value: unknown): value is string {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && validCalendarDate(value.slice(0, 10)) && Number.isFinite(Date.parse(value))
+}
+
+export function mergePlanImport(current: Plan[], incoming: Plan[], memories: Memory[]) {
+  const linkedMemories = new Map(memories.map((memory) => [memory.planId, memory]))
+  for (const plan of incoming) {
+    const memory = linkedMemories.get(plan.id)
+    if (memory && (plan.experienceId !== memory.experienceId || plan.status !== 'completed')) {
+      throw new Error('The import changes a plan with a saved memory. Keep its activity and completed status.')
+    }
+  }
+  const incomingIds = new Set(incoming.map((plan) => plan.id))
+  const incomingActivities = new Set(incoming.filter((plan) => plan.status === 'planned').map((plan) => plan.experienceId))
+  const retained = current.filter((plan) => !incomingIds.has(plan.id) && (plan.status !== 'planned' || !incomingActivities.has(plan.experienceId)))
+  return [...retained, ...incoming]
+}
+
+export function pendingMemoryPlans(plans: Plan[], memories: Memory[]) {
+  const recorded = new Set(memories.map((memory) => memory.planId))
+  return plans.filter((plan) => plan.status === 'completed' && !plan.memoryPromptDismissedAt && !recorded.has(plan.id))
+    .sort((left, right) => Date.parse(right.completedAt ?? right.plannedDate) - Date.parse(left.completedAt ?? left.plannedDate))
 }
 
 export function parsePlanImport(value: unknown): Plan[] {

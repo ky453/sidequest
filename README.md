@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-`npm test` checks scheduling, memory fields, search/sorting, seeded associations, monthly profile statistics, budget validation, photo selection limits, and plan import validation. `npm run lint` checks source code. `npm run build` checks TypeScript and creates the production bundle.
+`npm test` checks Discover filters, scheduling, memory fields, search/sorting, seeded associations, monthly profile statistics, budget validation, photo selection limits, and plan import validation/merging. `npm run lint` checks source code. `npm run build` checks TypeScript and creates the production bundle. See [the QA report](docs/QA_Report.md) for tested journeys and remaining limitations.
 
 ## Current Scope
 
@@ -25,7 +25,7 @@ Plans starts on today's date in Ithaca and includes shared mock records for the 
 
 Flexible activities require an explicit date, start time, and end time. Activity Details leaves these blank for a new plan; Add Event defaults only the date to the selected calendar day. Times are local to Ithaca (Eastern Time), and the end must be after the start on the same day. The market is a fixed event on October 9, 2026, from 4:00 PM to 6:00 PM; its fields are locked. Clicking a scheduled event opens Edit Plan. Flexible plans can be rescheduled or removed; fixed events cannot be rescheduled. Either kind can be marked completed in the plan modal. Saving a schedule selects that date in Plans. Dismiss hides a completed-memory prompt without deleting the completed record. Planning another visit preserves past completed records.
 
-Calendar Import and Export operate on local Sidequest JSON files, not external calendars. Version 2 exports include explicit `plannedDate`, `startTime`, `endTime`, and `status`, as well as completed records and prompt dismissals. Import validates record IDs, activity references, statuses, dates, time ranges, and fixed schedules before merging. Older unscheduled exports are rejected rather than assigned invented schedules. Calendar exports contain plans only, not memories or local photos.
+Calendar Import and Export operate on local Sidequest JSON files, not external calendars. Version 2 exports include explicit `plannedDate`, `startTime`, `endTime`, and `status`, as well as completed records and prompt dismissals. Import validates record IDs, activity references, statuses, dates, time ranges, and fixed schedules before merging. A plan linked to a saved memory cannot be reassigned to another activity or reopened as planned by an import. Older unscheduled exports are rejected rather than assigned invented schedules. Calendar exports contain plans only, not memories or local photos.
 
 Add Memory opens from a completed plan, with its experience name and scheduled date pre-filled. Name and date are required; rating (1-5), people, journal, spending, and photo are optional per the PRD. Blank spending stays unset, while zero explicitly records a free experience. Friend names are trimmed and deduplicated; the X removes a tag. A local JPEG, PNG, WebP, or GIF up to 5 MB can be previewed, replaced, or removed. Images are kept as in-memory data URLs, never uploaded. Save Memory associates the entry with both its Experience and completed Plan, hides that plan's outstanding memory prompt, and navigates to `/memories`. Each completed plan has at most one memory; another completed visit can have its own. Back and Cancel return to Plans without saving. Memories and photos reset on refresh along with the rest of local state; cloud storage remains deferred.
 

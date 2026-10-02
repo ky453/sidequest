@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, Share2, Star } from 'lucide-react'
-import { useLayoutEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { ExperienceActions } from '../components/ExperienceActions'
@@ -30,9 +30,6 @@ export function ActivityRoute() {
 
 function ActivityDetails({ experience, from }: { experience: Experience; from: string }) {
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle')
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0)
-  }, [experience.id])
   const category = categories.find((item) => item.id === experience.category)?.label
   const fixedSchedule = experience.schedule.type === 'fixed' ? experience.schedule : null
 

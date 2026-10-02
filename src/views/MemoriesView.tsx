@@ -1,5 +1,4 @@
 import { Image as ImageIcon } from 'lucide-react'
-import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { MemoryDetail } from '../components/MemoryDetail'
 import { PageHeader } from '../components/PageHeader'
@@ -20,7 +19,6 @@ export function MemoriesView() {
     next.delete('memory')
     setParams(next, { replace: true })
   }
-  useEffect(() => { window.scrollTo(0, 0) }, [])
   return <div className="memories-view">
     <PageHeader title="Saved Memories" subtitle="Your timeline of completed local adventures" />
     <SearchBar label="Search memories" placeholder="Search memories..." value={query} onChange={(value) => {

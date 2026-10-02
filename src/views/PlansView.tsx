@@ -8,7 +8,7 @@ import { PlanCard } from '../components/PlanCard'
 import { PlanModal } from '../components/PlanModal'
 import { experiences } from '../data/experiences'
 import { planningToday } from '../data/plans'
-import { formatPlanDate, parsePlanImport, validCalendarDate } from '../lib/plans'
+import { formatPlanDate, parsePlanImport, pendingMemoryPlans, validCalendarDate } from '../lib/plans'
 import { useSidequest } from '../state/sidequest-context'
 import type { Plan } from '../types'
 
@@ -19,8 +19,7 @@ export function PlansView() {
   const [modal, setModal] = useState<{ defaultDate: string; plan?: Plan } | null>(null)
   const upcoming = plans.filter((plan) => plan.status === 'planned' && plan.plannedDate === planningDate)
     .sort((left, right) => left.startTime.localeCompare(right.startTime))
-  const completed = plans.filter((plan) => plan.status === 'completed' && !plan.memoryPromptDismissedAt && !memories.some((memory) => memory.planId === plan.id))
-    .sort((left, right) => (right.completedAt ?? right.plannedDate).localeCompare(left.completedAt ?? left.plannedDate))
+  const completed = pendingMemoryPlans(plans, memories)
 
   async function handleImport(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]

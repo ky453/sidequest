@@ -1,4 +1,4 @@
-import { BookOpen, Coffee, SlidersHorizontal, Sun, UsersRound } from 'lucide-react'
+import { BookOpen, Check, Coffee, SlidersHorizontal, Sun, UsersRound } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { ExperienceCard } from '../components/ExperienceCard'
@@ -56,7 +56,7 @@ export function DiscoverView() {
           {categories.map((category) => {
             const Icon = categoryIcons[category.id]
             const active = filters.category === category.id
-            return <button type="button" key={category.id} className={`category-tile${active ? ' category-tile--active' : ''}`} aria-pressed={active} onClick={() => updateFilter('category', active ? '' : category.id)}><Icon size={21} aria-hidden="true" /><span>{category.label}</span></button>
+            return <button type="button" key={category.id} className={`category-tile${active ? ' category-tile--active' : ''}`} aria-pressed={active} onClick={() => updateFilter('category', active ? '' : category.id)}><Icon size={21} aria-hidden="true" /><span>{category.label}</span>{active && <Check className="category-selected" size={12} aria-hidden="true" />}</button>
           })}
         </div>
       </section>

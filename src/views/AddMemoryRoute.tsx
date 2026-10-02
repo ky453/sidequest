@@ -1,5 +1,4 @@
 import { ArrowLeft } from 'lucide-react'
-import { useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MemoryForm } from '../components/MemoryForm'
 import { experiences } from '../data/experiences'
@@ -12,7 +11,6 @@ export function AddMemoryRoute() {
   const plan = plans.find((item) => item.id === params.get('planId') && item.experienceId === params.get('experienceId') && item.status === 'completed')
   const experience = experiences.find((item) => item.id === plan?.experienceId)
   const existing = memories.some((memory) => memory.planId === plan?.id)
-  useEffect(() => { window.scrollTo(0, 0) }, [plan?.id])
   if (!plan || !experience || existing) return <div className="route-placeholder">
     <Link className="back-link" to="/plans"><ArrowLeft size={20} aria-hidden="true" />Back to Plans</Link>
     <h1>Add Memory</h1>

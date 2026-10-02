@@ -1,4 +1,5 @@
 import { formatPlanTime, scheduleProblem, validCalendarDate } from './plans'
+import { validMoneyAmount } from './money'
 import type { Memory, MemoryDraft, MemoryPhoto } from '../types'
 
 export const photoAccept = 'image/jpeg,image/png,image/webp,image/gif'
@@ -37,7 +38,7 @@ export function spendingValue(value: string): number | null {
   if (!trimmed) return null
   if (!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(trimmed)) throw new Error('Enter a non-negative amount with up to two decimal places.')
   const amount = Number(trimmed)
-  if (!Number.isFinite(amount) || !Number.isSafeInteger(Math.round(amount * 100))) throw new Error('Enter a valid spending amount.')
+  if (!validMoneyAmount(amount)) throw new Error('Enter a valid spending amount.')
   return amount
 }
 
@@ -56,7 +57,7 @@ export function memoryProblem(draft: MemoryDraft) {
     if (problem) return problem
   }
   if (draft.rating !== null && (!Number.isInteger(draft.rating) || draft.rating < 1 || draft.rating > 5)) return 'Choose a rating from 1 to 5.'
-  if (draft.amountSpent !== null && (!Number.isFinite(draft.amountSpent) || draft.amountSpent < 0 || !Number.isSafeInteger(Math.round(draft.amountSpent * 100)) || Math.abs(draft.amountSpent * 100 - Math.round(draft.amountSpent * 100)) > 0.000001)) return 'Enter a valid spending amount with up to two decimal places.'
+  if (draft.amountSpent !== null && !validMoneyAmount(draft.amountSpent)) return 'Enter a valid spending amount with up to two decimal places.'
   return null
 }
 

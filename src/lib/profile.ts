@@ -1,6 +1,7 @@
 import type { Memory, Plan, UserProfile } from '../types'
 import { selectMemories } from './memories'
 import { validCalendarDate } from './plans'
+import { validMoneyAmount } from './money'
 
 export function profileMonth(value: string | null, currentMonth: string) {
   return value && /^\d{4}-\d{2}$/.test(value) && validCalendarDate(`${value}-01`) && value <= currentMonth ? value : currentMonth
@@ -8,7 +9,7 @@ export function profileMonth(value: string | null, currentMonth: string) {
 
 export function profileProblem(profile: UserProfile) {
   if (!profile.name.trim()) return 'Enter your name.'
-  if (!Number.isFinite(profile.monthlyBudget) || profile.monthlyBudget < 0 || !Number.isSafeInteger(Math.round(profile.monthlyBudget * 100)) || Math.abs(profile.monthlyBudget * 100 - Math.round(profile.monthlyBudget * 100)) > 0.000001) return 'Enter a non-negative monthly budget with up to two decimal places.'
+  if (!validMoneyAmount(profile.monthlyBudget)) return 'Enter a non-negative monthly budget with up to two decimal places.'
   return null
 }
 

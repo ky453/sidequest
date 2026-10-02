@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
   const titleId = useId()
   useLayoutEffect(() => {
     const dialog = dialogRef.current!
@@ -15,9 +16,18 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
     return () => {
       dialog.close()
       document.body.style.overflow = previousOverflow
-      if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus({ preventScroll: true })
+      // Wait for the commit to remove completed/deleted rows before restoring focus.
+      queueMicrotask(() => {
+        if (document.querySelector('dialog[open]')) return
+        const returnFocus = trigger instanceof HTMLElement && trigger.isConnected ? trigger : document.getElementById('main-content')
+        returnFocus?.focus({ preventScroll: true })
+      })
     }
   }, [])
+
+  useLayoutEffect(() => {
+    if (!dialogRef.current?.contains(document.activeElement)) headingRef.current?.focus()
+  }, [title])
 
   function containFocus(event: KeyboardEvent<HTMLDialogElement>) {
     if (event.key !== 'Tab') return
@@ -37,7 +47,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
   return createPortal(
     <dialog ref={dialogRef} className="modal" aria-labelledby={titleId} onKeyDown={containFocus} onCancel={(event) => { event.preventDefault(); onClose() }}>
       <div className="modal-header">
-        <h2 id={titleId}>{title}</h2>
+        <h2 ref={headingRef} tabIndex={-1} id={titleId}>{title}</h2>
         <button type="button" className="modal-close" aria-label="Close dialog" title="Close" onClick={onClose}><X size={20} aria-hidden="true" /></button>
       </div>
       {children}

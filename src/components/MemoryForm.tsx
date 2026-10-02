@@ -29,15 +29,26 @@ export function MemoryForm({ initial, onSave, title = 'Add Memory', returnTo = '
   const [photoError, setPhotoError] = useState('')
   const [error, setError] = useState('')
   const fileInput = useRef<HTMLInputElement>(null)
+  const peopleField = useRef<HTMLFieldSetElement>(null)
+  const photoButton = useRef<HTMLButtonElement>(null)
   const photoRequest = useRef(0)
   const backLabel = title === 'Edit Memory' ? 'Back to Memories' : 'Back to Plans'
   useEffect(() => () => { photoRequest.current += 1 }, [])
 
+  function restorePeopleFocus() {
+    queueMicrotask(() => peopleField.current?.querySelector<HTMLElement>('.add-friend-button, input')?.focus({ preventScroll: true }))
+  }
+
+  function cancelPerson() {
+    setAddingPerson(false)
+    setPersonName('')
+    restorePeopleFocus()
+  }
+
   function commitPerson() {
     if (!personName.trim()) return
     setPeople((current) => addPerson(current, personName))
-    setPersonName('')
-    setAddingPerson(false)
+    cancelPerson()
   }
 
   async function selectPhoto(event: ChangeEvent<HTMLInputElement>) {
@@ -85,28 +96,28 @@ export function MemoryForm({ initial, onSave, title = 'Add Memory', returnTo = '
         <label className="memory-field">End Time<span className="memory-input-icon"><Clock size={15} aria-hidden="true" /><input type="time" value={endTime} onChange={(event) => { setEndTime(event.target.value); setError('') }} /></span></label>
       </div>
       <fieldset className="memory-field memory-fieldset"><legend>Rating</legend><StarRating value={rating} onChange={setRating} /></fieldset>
-      <fieldset className="memory-field memory-fieldset"><legend>People With You</legend>
+      <fieldset ref={peopleField} className="memory-field memory-fieldset"><legend>People With You</legend>
         <div className="memory-people">
-          {people.map((person) => <span className="person-chip" key={person}><span>{person}</span><button type="button" aria-label={`Remove ${person}`} title={`Remove ${person}`} onClick={() => setPeople((current) => current.filter((name) => name !== person))}><X size={12} aria-hidden="true" /></button></span>)}
+          {people.map((person) => <span className="person-chip" key={person}><span>{person}</span><button type="button" aria-label={`Remove ${person}`} title={`Remove ${person}`} onClick={() => { setPeople((current) => current.filter((name) => name !== person)); restorePeopleFocus() }}><X size={12} aria-hidden="true" /></button></span>)}
           {!addingPerson && <Button className="add-friend-button" onClick={() => setAddingPerson(true)}><Plus size={11} aria-hidden="true" />Add Friend</Button>}
         </div>
         {addingPerson && <div className="person-editor">
           <input type="text" aria-label="Friend name" placeholder="Name" autoFocus value={personName} onChange={(event) => setPersonName(event.target.value)} onKeyDown={(event) => {
             if (event.key === 'Enter') { event.preventDefault(); commitPerson() }
-            if (event.key === 'Escape') { event.preventDefault(); setAddingPerson(false); setPersonName('') }
+            if (event.key === 'Escape') { event.preventDefault(); cancelPerson() }
           }} />
           <button type="button" className="person-editor-action" title="Add friend" aria-label="Add friend" disabled={!personName.trim()} onClick={commitPerson}><Check size={18} aria-hidden="true" /></button>
-          <button type="button" className="person-editor-action" title="Cancel adding friend" aria-label="Cancel adding friend" onClick={() => { setAddingPerson(false); setPersonName('') }}><X size={18} aria-hidden="true" /></button>
+          <button type="button" className="person-editor-action" title="Cancel adding friend" aria-label="Cancel adding friend" onClick={cancelPerson}><X size={18} aria-hidden="true" /></button>
         </div>}
       </fieldset>
       <label className="memory-field">Journal Note<textarea aria-label="Journal Note" rows={4} value={journal} onChange={(event) => setJournal(event.target.value)} /></label>
       <div className="memory-field">
         <span>Attach Photo</span>
         <input ref={fileInput} className="sr-only" tabIndex={-1} type="file" accept={photoAccept} aria-label="Attach photo" onChange={selectPhoto} />
-        <button className={`memory-photo-placeholder${photo ? ' memory-photo-placeholder--filled' : ''}`} type="button" aria-label={photo ? 'Replace photo' : 'Select photo'} onClick={() => fileInput.current?.click()}>
+        <button ref={photoButton} className={`memory-photo-placeholder${photo ? ' memory-photo-placeholder--filled' : ''}`} type="button" aria-label={photo ? 'Replace photo' : 'Select photo'} onClick={() => fileInput.current?.click()}>
           {photo ? <img src={photo.dataUrl} alt={photo.name} /> : <><ImageIcon size={28} aria-hidden="true" /><span>{photoLoading ? 'Opening photo...' : 'Tap to upload media'}</span></>}
         </button>
-        {photo && <div className="memory-photo-caption"><span>{photo.name}</span><button type="button" title="Remove photo" aria-label="Remove photo" onClick={() => { photoRequest.current += 1; setPhoto(undefined); setPhotoLoading(false); setPhotoError('') }}><Trash2 size={16} aria-hidden="true" /></button></div>}
+        {photo && <div className="memory-photo-caption"><span>{photo.name}</span><button type="button" title="Remove photo" aria-label="Remove photo" onClick={() => { photoRequest.current += 1; setPhoto(undefined); setPhotoLoading(false); setPhotoError(''); photoButton.current?.focus({ preventScroll: true }) }}><Trash2 size={16} aria-hidden="true" /></button></div>}
         {photoError && <p className="memory-error" role="alert">{photoError}</p>}
       </div>
       {error && <p className="memory-error" role="alert">{error}</p>}

@@ -7,7 +7,7 @@ import { initialPlans, planningToday } from '../data/plans'
 import { initialMemories } from '../data/memories'
 import { initialProfile } from '../data/profile'
 import { profileProblem } from '../lib/profile'
-import { scheduleProblem } from '../lib/plans'
+import { mergePlanImport, scheduleProblem } from '../lib/plans'
 import { memoryProblem, normalizedMemoryDraft } from '../lib/memories'
 
 export function SidequestProvider({ children }: { children: ReactNode }) {
@@ -99,12 +99,9 @@ export function SidequestProvider({ children }: { children: ReactNode }) {
   }
 
   function importPlans(importedPlans: Plan[]) {
-    setPlans((current) => {
-      const incomingIds = new Set(importedPlans.map((plan) => plan.id))
-      const incomingActivities = new Set(importedPlans.filter((plan) => plan.status === 'planned').map((plan) => plan.experienceId))
-      const retained = current.filter((plan) => !incomingIds.has(plan.id) && (plan.status !== 'planned' || !incomingActivities.has(plan.experienceId)))
-      return [...retained, ...importedPlans]
-    })
+    // Validate here so the form can report errors before React processes the queued update.
+    mergePlanImport(plans, importedPlans, memories)
+    setPlans((current) => mergePlanImport(current, importedPlans, memories))
   }
 
   return (

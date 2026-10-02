@@ -82,3 +82,50 @@ test('month navigation avoids short-month overflow and crosses years in either d
   assert.equal(helpers.moveCalendarMonth('2027-01-31', 1), '2027-02-01')
   assert.equal(helpers.moveCalendarMonth('2026-03-31', -1), '2026-02-01')
 })
+
+test('plan import cannot reassign or reopen a completed visit linked to a memory', () => {
+  const completed = { ...flexible, status: 'completed' }
+  const memory = { planId: completed.id, experienceId: completed.experienceId }
+  const current = [completed, market]
+  for (const incoming of [{ ...completed, status: 'planned' }, { ...completed, experienceId: 'campus-boba-break' }]) {
+    assert.throws(() => helpers.mergePlanImport(current, [incoming], [memory]), /saved memory/)
+    assert.equal(current[0], completed)
+    assert.equal(current[0].status, 'completed')
+  }
+  const updated = { ...completed, note: 'Preserved completed visit' }
+  const merged = helpers.mergePlanImport(current, [updated], [memory])
+  assert.equal(merged.find((plan) => plan.id === completed.id).note, updated.note)
+  assert.equal(merged.length, 2)
+  assert.equal(current[0].note, undefined)
+})
+
+test('plan import merges latest upcoming schedules without deleting completed history or mutating input', () => {
+  const history = { ...flexible, id: 'completed-visit', status: 'completed' }
+  const replacement = { ...flexible, id: 'replacement', plannedDate: '2026-12-24' }
+  const current = [flexible, history, market]
+  const merged = helpers.mergePlanImport(current, [replacement], [])
+  assert.deepEqual(merged.map((plan) => plan.id), [history.id, market.id, replacement.id])
+  assert.equal(current.length, 3)
+  assert.equal(current[0].plannedDate, '2026-10-06')
+})
+
+test('calendar day arithmetic stays stable through daylight-saving transitions', () => {
+  assert.equal(helpers.planDateKey('2026-03-08T06:30:00Z'), '2026-03-08')
+  assert.equal(helpers.planDateKey('2026-03-08T07:30:00Z'), '2026-03-08')
+  assert.equal(helpers.planDateKey('2026-11-01T05:30:00Z'), '2026-11-01')
+  assert.equal(helpers.planDateKey('2026-11-01T06:30:00Z'), '2026-11-01')
+  for (const month of ['2026-03-01', '2026-11-01']) {
+    const days = helpers.calendarMonthDays(month)
+    for (let i = 1; i < days.length; i++) assert.equal(days[i].getTime() - days[i - 1].getTime(), 86400000)
+  }
+})
+
+test('completed prompts sort by actual timestamps across offsets and hide recorded or dismissed visits', () => {
+  const early = { ...flexible, id: 'early', status: 'completed', completedAt: '2026-10-01T22:00:00Z' }
+  const late = { ...early, id: 'late', completedAt: '2026-10-01T19:00:00-04:00' }
+  const recorded = { ...early, id: 'recorded' }
+  const dismissed = { ...early, id: 'dismissed', memoryPromptDismissedAt: '2026-10-02T00:00:00Z' }
+  const plans = [early, late, recorded, dismissed, flexible]
+  assert.deepEqual(helpers.pendingMemoryPlans(plans, [{ planId: recorded.id }]).map((plan) => plan.id), ['late', 'early'])
+  assert.equal(plans[0].id, 'early')
+})

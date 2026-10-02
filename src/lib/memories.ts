@@ -1,8 +1,30 @@
-import { scheduleProblem, validCalendarDate } from './plans'
-import type { MemoryDraft, MemoryPhoto } from '../types'
+import { formatPlanTime, scheduleProblem, validCalendarDate } from './plans'
+import type { Memory, MemoryDraft, MemoryPhoto } from '../types'
 
 export const photoAccept = 'image/jpeg,image/png,image/webp,image/gif'
 export const maximumPhotoBytes = 5 * 1024 * 1024
+
+export const memoryDollars = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2 })
+
+export function memoryTimeRange(memory: Pick<MemoryDraft, 'startTime' | 'endTime'>) {
+  return memory.startTime && memory.endTime ? `${formatPlanTime(memory.startTime)} - ${formatPlanTime(memory.endTime)} ET` : ''
+}
+
+export function selectMemories(memories: Memory[], query: string) {
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  return memories.filter((memory) => {
+    const text = `${memory.name} ${memory.journal}`.toLowerCase()
+    return terms.every((term) => text.includes(term))
+  }).sort((left, right) => right.date.localeCompare(left.date) || Date.parse(right.createdAt) - Date.parse(left.createdAt))
+}
+
+export function normalizedMemoryDraft(draft: MemoryDraft): MemoryDraft {
+  return {
+    name: draft.name.trim(), date: draft.date, startTime: draft.startTime, endTime: draft.endTime,
+    rating: draft.rating, people: draft.people.reduce<string[]>((people, name) => addPerson(people, name), []),
+    journal: draft.journal.trim(), amountSpent: draft.amountSpent, photo: draft.photo,
+  }
+}
 
 export function photoProblem(file: Pick<File, 'type' | 'size'>) {
   if (!photoAccept.split(',').includes(file.type)) return 'Choose a JPEG, PNG, WebP, or GIF image.'

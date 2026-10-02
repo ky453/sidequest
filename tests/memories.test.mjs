@@ -4,9 +4,13 @@ import { createServer } from 'vite'
 
 let server
 let helpers
+let seededMemories
+let seededPlans
 before(async () => {
   server = await createServer({ server: { middlewareMode: true, ws: false }, appType: 'custom' })
   helpers = await server.ssrLoadModule('/src/lib/memories.ts')
+  seededMemories = (await server.ssrLoadModule('/src/data/memories.ts')).initialMemories
+  seededPlans = (await server.ssrLoadModule('/src/data/plans.ts')).initialPlans
 })
 after(async () => { await server?.close() })
 
@@ -50,4 +54,41 @@ test('local photo selection is limited to supported raster images and 5 MB', () 
   assert.equal(typeof helpers.photoProblem({ type: 'text/plain', size: 500 }), 'string')
   assert.equal(typeof helpers.photoProblem({ type: 'image/svg+xml', size: 500 }), 'string')
   assert.equal(typeof helpers.photoProblem({ type: 'image/png', size: 5 * 1024 * 1024 + 1 }), 'string')
+})
+
+test('memory search matches names and journal text without mutating the original list', () => {
+  const entries = [...seededMemories].reverse()
+  assert.equal(helpers.selectMemories(entries, ' SUNSET cocoa ')[0].id, 'memory-sunset-picnic')
+  assert.equal(helpers.selectMemories(entries, 'BOBA')[0].id, 'memory-boba-board-games')
+  assert.equal(helpers.selectMemories(entries, 'freezing')[0].id, 'memory-sunset-picnic')
+  assert.equal(helpers.selectMemories(entries, 'unmatched query').length, 0)
+  assert.equal(helpers.selectMemories(entries, '   ').length, 2)
+  assert.equal(entries[0].id, 'memory-boba-board-games')
+})
+
+test('memories sort by experience date, then actual creation time across timezone offsets', () => {
+  const early = { ...seededMemories[0], id: 'early', createdAt: '2026-10-01T22:00:00Z' }
+  const late = { ...seededMemories[0], id: 'late', createdAt: '2026-10-01T19:00:00-04:00' }
+  assert.deepEqual(helpers.selectMemories([early, seededMemories[1], late], '').map((memory) => memory.id), ['late', 'early', 'memory-boba-board-games'])
+})
+
+test('normalizing an edit only returns editable fields and preserves explicit zero and photo data', () => {
+  const photo = { name: 'photo.png', dataUrl: 'data:image/png;base64,local' }
+  const edited = helpers.normalizedMemoryDraft({ ...draft, id: 'override', planId: 'override', experienceId: 'override', name: '  Afternoon walk  ', people: [' Sarah ', 'sarah', 'Alex'], journal: ' Reflection\nSecond line ', amountSpent: 0, photo })
+  assert.equal(edited.name, 'Afternoon walk')
+  assert.deepEqual(edited.people, ['Sarah', 'Alex'])
+  assert.equal(edited.journal, 'Reflection\nSecond line')
+  assert.equal(edited.amountSpent, 0)
+  assert.deepEqual(edited.photo, photo)
+  for (const key of ['id', 'planId', 'experienceId', 'createdAt']) assert.equal(key in edited, false)
+})
+
+test('seed memories have valid data and matching completed plan associations', () => {
+  for (const memory of seededMemories) {
+    assert.equal(helpers.memoryProblem(memory), null)
+    const plan = seededPlans.find((entry) => entry.id === memory.planId)
+    assert.equal(plan.status, 'completed')
+    assert.equal(plan.experienceId, memory.experienceId)
+    assert.equal(plan.plannedDate, memory.date)
+  }
 })

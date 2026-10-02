@@ -14,6 +14,8 @@ export interface SidequestState {
   removePlan: (planId: string) => void
   completePlan: (planId: string) => void
   saveMemory: (planId: string, draft: MemoryDraft) => void
+  updateMemory: (memoryId: string, draft: MemoryDraft) => void
+  deleteMemory: (memoryId: string) => void
 }
 
 export const SidequestContext = createContext<SidequestState | null>(null)

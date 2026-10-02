@@ -7,6 +7,7 @@ import { PlansView } from './views/PlansView'
 import { AddMemoryRoute } from './views/AddMemoryRoute'
 import { MemoriesView } from './views/MemoriesView'
 import { EditMemoryRoute } from './views/EditMemoryRoute'
+import { ProfileView } from './views/ProfileView'
 import './App.css'
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="memories" element={<MemoriesView />} />
           <Route path="memories/new" element={<AddMemoryRoute />} />
           <Route path="memories/:memoryId/edit" element={<EditMemoryRoute />} />
+          <Route path="profile" element={<ProfileView />} />
           <Route path="*" element={<ActivityRoute />} />
         </Route>
       </Routes>

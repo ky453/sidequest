@@ -67,3 +67,10 @@ export interface Memory extends MemoryDraft {
   planId: string
   createdAt: string
 }
+
+export interface UserProfile {
+  name: string
+  year: string
+  location: string
+  monthlyBudget: number
+}

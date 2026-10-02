@@ -13,7 +13,7 @@ export function BottomNav() {
         <CalendarDays size={21} aria-hidden="true" /><span>Plans</span>
       </NavLink>
       <NavLink to="/memories" className={({ isActive }) => `nav-item${isActive || isAddMemory ? ' nav-item--active' : ''}`}><Heart size={21} aria-hidden="true" /><span>Memories</span></NavLink>
-      <button className="nav-item" disabled title="Profile is coming later"><UserRound size={21} aria-hidden="true" /><span>Profile</span></button>
+      <NavLink to="/profile" className={({ isActive }) => `nav-item${isActive ? ' nav-item--active' : ''}`}><UserRound size={21} aria-hidden="true" /><span>Profile</span></NavLink>
     </nav>
   )
 }

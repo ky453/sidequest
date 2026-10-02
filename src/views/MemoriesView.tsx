@@ -42,7 +42,7 @@ export function MemoriesView() {
       </article>)}
     </div>
     {!ordered.length && <p className="plans-empty" role="status">{memories.length ? 'No memories match your search.' : 'No memories yet.'}</p>}
-    {selected && <MemoryDetail key={selected.id} memory={selected} onClose={closeDetail} />}
+    {selected && <MemoryDetail key={selected.id} memory={selected} readOnly={false} onClose={closeDetail} />}
     {params.has('memory') && !selected && <p className="plans-empty" role="status">Memory not found.</p>}
   </div>
 }

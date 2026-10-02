@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import type { Memory, MemoryDraft, Plan, PlanSchedule, SavedExperience } from '../types'
+import type { Memory, MemoryDraft, Plan, PlanSchedule, SavedExperience, UserProfile } from '../types'
 import { SidequestContext } from './sidequest-context'
 import { experiences } from '../data/experiences'
 import { initialPlans, planningToday } from '../data/plans'
 import { initialMemories } from '../data/memories'
+import { initialProfile } from '../data/profile'
+import { profileProblem } from '../lib/profile'
 import { scheduleProblem } from '../lib/plans'
 import { memoryProblem, normalizedMemoryDraft } from '../lib/memories'
 
@@ -13,6 +15,13 @@ export function SidequestProvider({ children }: { children: ReactNode }) {
   const [plans, setPlans] = useState<Plan[]>(() => initialPlans.map((plan) => ({ ...plan })))
   const [planningDate, setPlanningDate] = useState(planningToday)
   const [memories, setMemories] = useState<Memory[]>(() => initialMemories.map((memory) => ({ ...memory, people: [...memory.people] })))
+  const [profile, setProfile] = useState<UserProfile>(() => ({ ...initialProfile }))
+
+  function updateProfile(draft: UserProfile) {
+    const problem = profileProblem(draft)
+    if (problem) throw new Error(problem)
+    setProfile({ name: draft.name.trim(), year: draft.year.trim(), location: draft.location.trim(), monthlyBudget: draft.monthlyBudget })
+  }
 
   function toggleSaved(experienceId: string) {
     setSavedExperiences((current) => current.some((saved) => saved.experienceId === experienceId)
@@ -99,7 +108,7 @@ export function SidequestProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SidequestContext value={{ savedExperiences, plans, memories, planningDate, setPlanningDate, toggleSaved, savePlan, removePlan, completePlan, saveMemory, updateMemory, deleteMemory, dismissMemoryPrompt, importPlans }}>
+    <SidequestContext value={{ savedExperiences, plans, memories, profile, updateProfile, planningDate, setPlanningDate, toggleSaved, savePlan, removePlan, completePlan, saveMemory, updateMemory, deleteMemory, dismissMemoryPrompt, importPlans }}>
       {children}
     </SidequestContext>
   )

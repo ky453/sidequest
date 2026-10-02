@@ -1,10 +1,12 @@
 import { createContext, useContext } from 'react'
-import type { Memory, MemoryDraft, Plan, PlanSchedule, SavedExperience } from '../types'
+import type { Memory, MemoryDraft, Plan, PlanSchedule, SavedExperience, UserProfile } from '../types'
 
 export interface SidequestState {
   savedExperiences: SavedExperience[]
   plans: Plan[]
   memories: Memory[]
+  profile: UserProfile
+  updateProfile: (profile: UserProfile) => void
   planningDate: string
   setPlanningDate: (date: string) => void
   dismissMemoryPrompt: (planId: string) => void

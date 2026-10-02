@@ -9,14 +9,15 @@ import { Button } from './Button'
 import { Modal } from './Modal'
 import { StarRating } from './StarRating'
 
-export function MemoryDetail({ memory, onClose }: { memory: Memory; onClose: () => void }) {
+export function MemoryDetail({ memory, onClose, readOnly = true }: { memory: Memory; onClose: () => void; readOnly?: boolean }) {
   const { deleteMemory } = useSidequest()
   const location = useLocation()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const deleting = !readOnly && confirmDelete
   const heading = useRef<HTMLHeadingElement>(null)
-  useEffect(() => { if (!confirmDelete) heading.current?.focus() }, [confirmDelete])
-  return <Modal title={confirmDelete ? 'Delete Memory' : 'Memory Detail'} onClose={onClose}>
-    {confirmDelete ? <div className="memory-delete-confirmation">
+  useEffect(() => { if (!deleting) heading.current?.focus() }, [deleting])
+  return <Modal title={deleting ? 'Delete Memory' : 'Memory Detail'} onClose={onClose}>
+    {deleting ? <div className="memory-delete-confirmation">
       <p>Delete &quot;{memory.name}&quot;? This memory and its local photo will be removed.</p>
       <div className="memory-detail-actions">
         <Button autoFocus onClick={() => setConfirmDelete(false)}>Cancel</Button>
@@ -33,10 +34,10 @@ export function MemoryDetail({ memory, onClose }: { memory: Memory; onClose: () 
         <div><dt>People With You</dt><dd>{memory.people.length ? memory.people.join(', ') : 'Not recorded'}</dd></div>
       </dl>
       <section className="memory-detail-journal"><h4>Journal Note</h4><p>{memory.journal || 'No journal note.'}</p></section>
-      <div className="memory-detail-actions">
+      {!readOnly && <div className="memory-detail-actions">
         <Link className="button button--primary" to={`/memories/${encodeURIComponent(memory.id)}/edit${location.search}`}><Pencil size={16} aria-hidden="true" />Edit Memory</Link>
         <Button className="memory-delete-button" onClick={() => setConfirmDelete(true)}><Trash2 size={16} aria-hidden="true" />Delete Memory</Button>
-      </div>
+      </div>}
     </div>}
   </Modal>
 }
